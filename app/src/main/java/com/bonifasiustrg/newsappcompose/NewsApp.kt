@@ -1,5 +1,6 @@
 package com.bonifasiustrg.newsappcompose
 
+import android.util.Log
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -22,6 +23,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.bonifasiustrg.newsappcompose.components.BottomMenuScreen
+import com.bonifasiustrg.newsappcompose.network.NewsManager
 import com.bonifasiustrg.newsappcompose.ui.screen.BookmarkScreen
 import com.bonifasiustrg.newsappcompose.ui.screen.CategoriesScreen
 import com.bonifasiustrg.newsappcompose.ui.screen.DetailScreen
@@ -55,9 +57,12 @@ fun MainScreen(navController: NavHostController, scrollState: ScrollState) {
 }
 
 @Composable
-fun Navigation(navController: NavHostController, scrollState: ScrollState) {
+fun Navigation(navController: NavHostController, scrollState: ScrollState, newsManager: NewsManager = NewsManager()) {
 //    val navController = rememberNavController()
 //    val scrollState = rememberScrollState()
+
+    val articles = newsManager.newsResponse.value.articles
+    Log.d("news", "$articles")
 
     NavHost(navController = navController, startDestination = "TopNews") {
         bottomNavigation(navController)
