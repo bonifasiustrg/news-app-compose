@@ -1,7 +1,10 @@
 package com.bonifasiustrg.newsappcompose
 
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,6 +26,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.bonifasiustrg.newsappcompose.components.BottomMenuScreen
+import com.bonifasiustrg.newsappcompose.models.TopNewsArticle
 import com.bonifasiustrg.newsappcompose.network.NewsManager
 import com.bonifasiustrg.newsappcompose.ui.screen.BookmarkScreen
 import com.bonifasiustrg.newsappcompose.ui.screen.CategoriesScreen
@@ -30,6 +34,7 @@ import com.bonifasiustrg.newsappcompose.ui.screen.DetailScreen
 import com.bonifasiustrg.newsappcompose.ui.screen.SourcesScreen
 import com.bonifasiustrg.newsappcompose.ui.screen.TopNews
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NewsApp() {
     val navController = rememberNavController()
@@ -38,6 +43,7 @@ fun NewsApp() {
     MainScreen(navController = navController, scrollState = scrollState)
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(navController: NavHostController, scrollState: ScrollState) {
@@ -52,43 +58,62 @@ fun MainScreen(navController: NavHostController, scrollState: ScrollState) {
     Scaffold(bottomBar = { if (showBottomBar) BottomMenuScreen(navController = navController)
     }) {
         Text(text = "${navController.currentDestination}", modifier = Modifier.padding(it))
-        Navigation(navController, scrollState)
+        Navigation(navController, scrollState, paddingValues = it)
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
-fun Navigation(navController: NavHostController, scrollState: ScrollState, newsManager: NewsManager = NewsManager()) {
+fun Navigation(navController: NavHostController,
+               scrollState: ScrollState,
+               newsManager: NewsManager = NewsManager(),
+               paddingValues: PaddingValues
+) {
 //    val navController = rememberNavController()
 //    val scrollState = rememberScrollState()
 
     val articles = newsManager.newsResponse.value.articles
-    Log.d("news", "$articles")
+    Log.e("article", "in Navigation $articles")
 
-    NavHost(navController = navController, startDestination = "TopNews") {
-        bottomNavigation(navController)
+    articles?.let{
+        NavHost(
+            navController = navController,
+            startDestination = /*"TopNews"*/ BottomMenu.TopNews.route,
+            modifier = Modifier.padding(paddingValues)
+        ) {
+            bottomNavigation(navController, articles)
 
-        composable("TopNews") {
-            TopNews(navController = navController)
+            /*composable("TopNews") {
+                TopNews(navController = navController, articles)
 
-            // Because we dont need to go to Detail again when back stack, just pop the activity,
-            // byt in detail screen we still need top news stack, so we not call this function
+                // Because we dont need to go to Detail again when back stack, just pop the activity,
+                // byt in detail screen we still need top news stack, so we not call this function
 //            navController.popBackStack()
 
-        }
+            }*/
 
-        composable("Detail/{newsId}", arguments = listOf(navArgument("newsId"){ type = NavType.IntType})
-        ) {navBackStackEntry ->
-            val id = navBackStackEntry.arguments?.getInt("newsId")
-            val newsData =MockData.getNewsById(id)
-            DetailScreen(newsData, scrollState, navController = navController)
+            composable(
+                "Detail/{index}",
+                arguments = listOf(navArgument(/*"newsId"*/"index") { type = NavType.IntType })
+            ) { navBackStackEntry ->
+                val /*id*/index = navBackStackEntry.arguments?.getInt("index ")
+//                val newsData = MockData.getNewsById(id)
+                index?.let {
+                    val article = articles[index]
+                    Log.e("article", "in navigation, index check detail")
+                    DetailScreen(article, scrollState, navController = navController)
+                }
+
+            }
         }
     }
 }
 
 // BUILD NAVIGATION FOR BOTTOM BAR
-fun NavGraphBuilder.bottomNavigation(navController: NavController) {
-    composable(BottomMenu.TopNew.route){
-        TopNews(navController = navController)
+@RequiresApi(Build.VERSION_CODES.O)
+fun NavGraphBuilder.bottomNavigation(navController: NavController, articles: List<TopNewsArticle>) {
+    composable(BottomMenu.TopNews.route){
+        TopNews(navController = navController, articles)
     }
     composable(BottomMenu.Categories.route){
         CategoriesScreen(navController = navController)

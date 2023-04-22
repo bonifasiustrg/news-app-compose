@@ -1,6 +1,8 @@
 package com.bonifasiustrg.newsappcompose.ui.screen
 
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
@@ -24,9 +26,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,12 +42,16 @@ import com.bonifasiustrg.NewsData
 import com.bonifasiustrg.newsappcompose.MockData
 import com.bonifasiustrg.newsappcompose.MockData.getTimeAgo
 import com.bonifasiustrg.newsappcompose.R
+import com.bonifasiustrg.newsappcompose.models.TopNewsArticle
+import com.skydoves.landscapist.ImageOptions
+import com.skydoves.landscapist.coil.CoilImage
 import java.util.Calendar
 import java.util.Date
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DetailScreen(newsData: NewsData, scrollState: ScrollState, navController:NavController) {
+fun DetailScreen(/*newsData: NewsData*/article: TopNewsArticle, scrollState: ScrollState, navController:NavController) {
     Scaffold(topBar = {
         DetailTopBar(onBackPressed = {
 //            navController.navigate("TopNews")
@@ -63,23 +72,36 @@ fun DetailScreen(newsData: NewsData, scrollState: ScrollState, navController:Nav
                         Toast.makeText(LocalContext.current, "Navigate to Detail Screen", Toast.LENGTH_SHORT).show()
                         Text(text = "Back to Top Screen ${newsData.author}")
                     }*/
-            //Todo 1 Remove the  Button and add an Image and set newsData.image as resource
-            Image(painter = painterResource(id = newsData.image), contentDescription = "")
+
+//            //Todo 1 Remove the  Button and add an Image and set newsData.image as resource
+//            Image(painter = painterResource(id = newsData.image), contentDescription = "")
+
+            CoilImage(
+                imageModel = { article.urlToImage },
+                imageOptions = ImageOptions(
+                    contentScale = ContentScale.Crop, alignment = Alignment.Center
+                ),
+                failure = { ImageBitmap.imageResource(R.drawable.news_img1) },
+                previewPlaceholder = R.drawable.news_img1
+            )
+
             //Todo 3: add a Row then use the InfoWithIcon composable to show author and published date
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                InfoWithIcon(Icons.Default.Edit, info = newsData.author)
+                InfoWithIcon(Icons.Default.Edit, info = /*newsData*/article.author ?: "Not Available")
                 InfoWithIcon(icon = Icons.Default.DateRange,
 //                    info = newsData.publishedAt
-                    info = MockData.stringToDate(newsData.publishedAt).getTimeAgo()
+                    info = MockData.stringToDate(article.publishedAt!!).getTimeAgo()
                 )
             }
             //Todo 4 add two Text for news title and news descriptionm
-            Text(text = newsData.title, fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp, end = 8.dp))
-            Text(text = newsData.description, modifier = Modifier.padding(top = 16.dp, start = 8.dp, end = 8.dp))
+            Text(text = /*newsData*/article.title ?: "Not Available",
+                fontWeight = FontWeight.Bold, modifier = Modifier.padding(start = 8.dp, end = 8.dp))
+            Text(text = /*newsData*/article.description ?: "Not Available",
+                modifier = Modifier.padding(top = 16.dp, start = 8.dp, end = 8.dp))
 
         }
     }
@@ -115,12 +137,12 @@ fun InfoWithIcon(icon: ImageVector, info: String) {
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true)
 @Composable
 fun DetailScreenPreview() {
-    DetailScreen(newsData = NewsData(
-        1,
-        R.drawable.news_img1,
+    DetailScreen(
+        TopNewsArticle(
         author = "Raja Razek, CNN",
         title = "'Tiger King' Joe Exotic says he has been diagnosed with aggressive form of prostate cancer - CNN",
         description = "Joseph Maldonado, known as Joe Exotic on the 2020 Netflix docuseries \\\"Tiger King: Murder, Mayhem and Madness,\\\" has been diagnosed with an aggressive form of prostate cancer, according to a letter written by Maldonado.",

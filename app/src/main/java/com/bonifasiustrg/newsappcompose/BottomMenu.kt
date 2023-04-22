@@ -12,7 +12,7 @@ sealed class BottomMenu(
     val icon: ImageVector,
     val title: String
 ) {
-    object TopNew: BottomMenu("top_news", Icons.Outlined.Home, "Top News")
+    object TopNews: BottomMenu("top_news", Icons.Outlined.Home, "Top News")
     object Categories: BottomMenu("categories", Icons.Outlined.Category, "Category")
     object Sources: BottomMenu("sources", Icons.Outlined.Source, "Sources")
     object Bookmark: BottomMenu("bookmark", Icons.Outlined.Bookmarks, "Saved News")
