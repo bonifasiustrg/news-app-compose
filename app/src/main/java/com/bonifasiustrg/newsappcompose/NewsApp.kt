@@ -72,7 +72,9 @@ fun Navigation(navController: NavHostController,
 //    val navController = rememberNavController()
 //    val scrollState = rememberScrollState()
 
-    val articles = newsManager.newsResponse.value.articles
+//    val articles = newsManager.newsResponse.value.articles
+    val articles = mutableListOf(TopNewsArticle())
+    articles.addAll(newsManager.newsResponse.value.articles ?: listOf(TopNewsArticle()))
     Log.e("article", "in Navigation $articles")
 
     articles?.let{
@@ -81,17 +83,8 @@ fun Navigation(navController: NavHostController,
             startDestination = /*"TopNews"*/ BottomMenu.TopNews.route,
             modifier = Modifier.padding(paddingValues)
         ) {
-            bottomNavigation(navController, articles)
 
-            /*composable("TopNews") {
-                TopNews(navController = navController, articles)
-
-                // Because we dont need to go to Detail again when back stack, just pop the activity,
-                // byt in detail screen we still need top news stack, so we not call this function
-//            navController.popBackStack()
-
-            }*/
-
+            bottomNavigation(/*navController*/navController, articles, newsManager)
             composable(
                 "Detail/{index}",
                 arguments = listOf(navArgument(/*"newsId"*/"index") { type = NavType.IntType })
@@ -101,6 +94,7 @@ fun Navigation(navController: NavHostController,
                 index?.let {
                     val article = articles[index]
                     Log.e("article", "in navigation, index check detail")
+                    Log.e("article", "in navigation, $article ${article.title}")
                     DetailScreen(article, scrollState, navController = navController)
                 }
 
@@ -111,12 +105,20 @@ fun Navigation(navController: NavHostController,
 
 // BUILD NAVIGATION FOR BOTTOM BAR
 @RequiresApi(Build.VERSION_CODES.O)
-fun NavGraphBuilder.bottomNavigation(navController: NavController, articles: List<TopNewsArticle>) {
+fun NavGraphBuilder.bottomNavigation(navController: NavController,
+                                     articles: List<TopNewsArticle>,
+                                     newsManager: NewsManager
+) {
     composable(BottomMenu.TopNews.route){
         TopNews(navController = navController, articles)
     }
     composable(BottomMenu.Categories.route){
-        CategoriesScreen(navController = navController)
+        CategoriesScreen(navController = navController,
+            newsManager = newsManager,
+            onFetchCategory = {
+                newsManager.onSelectedCategoryChanged(it)
+            }
+        )
     }
 
     composable(BottomMenu.Sources.route){

@@ -1,6 +1,7 @@
 package com.bonifasiustrg.newsappcompose.ui.screen
 
 import android.os.Build
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
@@ -75,7 +76,7 @@ fun DetailScreen(/*newsData: NewsData*/article: TopNewsArticle, scrollState: Scr
 
 //            //Todo 1 Remove the  Button and add an Image and set newsData.image as resource
 //            Image(painter = painterResource(id = newsData.image), contentDescription = "")
-
+            Log.i("article", "detail1: $article ${article.title}")
             CoilImage(
                 imageModel = { article.urlToImage },
                 imageOptions = ImageOptions(
@@ -84,6 +85,8 @@ fun DetailScreen(/*newsData: NewsData*/article: TopNewsArticle, scrollState: Scr
                 failure = { ImageBitmap.imageResource(R.drawable.news_img1) },
                 previewPlaceholder = R.drawable.news_img1
             )
+            Log.i("article", "detail2: $article")
+            Log.i("article", "detail2: ${article.title}")
 
             //Todo 3: add a Row then use the InfoWithIcon composable to show author and published date
             Row(

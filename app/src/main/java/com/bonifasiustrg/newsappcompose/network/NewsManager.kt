@@ -2,10 +2,13 @@ package com.bonifasiustrg.newsappcompose.network
 
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import com.bonifasiustrg.newsappcompose.models.ArticleCategory
 import com.bonifasiustrg.newsappcompose.models.TopNewsResponse
+import com.bonifasiustrg.newsappcompose.models.getArticleCategory
 import com.bonifasiustrg.newsappcompose.utils.Constant
 import retrofit2.Call
 import retrofit2.Callback
@@ -19,6 +22,8 @@ class NewsManager {
         @Composable get() = remember {
             _newsResponse
         }
+
+    val selectedCategory: MutableState<ArticleCategory?> = mutableStateOf(null)
 
     init {
         getArticles() // will be used whenever NewsManager class is initialized
@@ -47,5 +52,10 @@ class NewsManager {
             }
 
         })
+    }
+
+    fun onSelectedCategoryChanged(category: String) {
+        val newCategory = getArticleCategory(category)
+        selectedCategory.value = newCategory
     }
 }
